@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-	fmt.Print("\033[2J\033[H")
 
 	args := os.Args[1:]
 
@@ -30,35 +29,42 @@ func main() {
 		return
 	}
 
-	fmt.Println("⏱️ Session info")
-	fmt.Println("Now: " + time.Now().Format("15:04"))
-	fmt.Printf("Work: %dm\n", workMin)
-	fmt.Printf("Break: %dm\n\n", breakMin)
+	sessionsCount := 1
 
-	workDuration := time.Duration(workMin) * time.Second
-	breakDuration := time.Duration(breakMin) * time.Second
+	var exit bool
 
-	fmt.Println("🍅 Working...")
-	progressBar(workDuration)
+	for !exit {
+		fmt.Print("\033[2J\033[H")
 
-	fmt.Print("\033[1A")
-	fmt.Print("\033[2K\r")
-	fmt.Print("\033[1A")
-	fmt.Print("\033[2K\r")
+		fmt.Println("⏱️ Session info")
+		fmt.Printf("Number: %d\n", sessionsCount)
+		fmt.Println("Now: " + time.Now().Format("15:04"))
+		fmt.Printf("Work: %dm\n", workMin)
+		fmt.Printf("Break: %dm\n\n", breakMin)
 
-	fmt.Println("Time to break!")
-	fmt.Print("Press Enter to start...")
-	bufio.NewReader(os.Stdin).ReadBytes('\n')
+		workDuration := time.Duration(workMin) * time.Second
+		breakDuration := time.Duration(breakMin) * time.Second
 
-	for i := 0; i < 2; i++ {
-		fmt.Print("\033[1A")
-		fmt.Print("\033[2K\r")
+		fmt.Println("🍅 Working...")
+		progressBar(workDuration)
+
+		clearPreviousLines(2)
+
+		fmt.Println("Time to break!")
+		fmt.Print("Press Enter to start...")
+		bufio.NewReader(os.Stdin).ReadBytes('\n')
+
+		clearPreviousLines(2)
+
+		fmt.Println("🍏 Break...")
+		progressBar(breakDuration)
+
+		fmt.Println("\nSession completed! Good job!")
+		sessionsCount++
+
+		fmt.Print("Press Enter to  new session...")
+		bufio.NewReader(os.Stdin).ReadBytes('\n')
 	}
-
-	fmt.Println("🍏 Break...")
-	progressBar(breakDuration)
-
-	fmt.Println("\nSession completed! Good job!")
 }
 
 func progressBar(duration time.Duration) {
@@ -88,4 +94,11 @@ func repeat(s string, count int) string {
 		result += s
 	}
 	return result
+}
+
+func clearPreviousLines(lines int) {
+	for i := 0; i < lines; i++ {
+		fmt.Print("\033[1A")
+		fmt.Print("\033[2K\r")
+	}
 }
